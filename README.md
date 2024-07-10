@@ -2,8 +2,7 @@
 
 ## 介绍
 统计每日书写的字数，并展示在日历中。
-
-![img.png](img.png)
+桌面端插件：https://github.com/yefengr/obsidian-daily-statistics
 
 ## 功能
 - [x] 统计每日字数
