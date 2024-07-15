@@ -1,36 +1,27 @@
 import {
-  addIcon,
   debounce,
   type Debouncer,
   MarkdownView,
   Plugin,
-  TFile,
-  type WorkspaceLeaf
-} from "obsidian";
+  TFile} from "obsidian";
 import { DailyStatisticsSettings } from "@/data/Settting";
 import { DailyStatisticsDataManager } from "@/data/StatisticsDataManager";
-import { CalendarView, Calendar_View } from "@/ui/calendar/CalendarView";
 import { SampleSettingTab } from "@/ui/setting/SampleSettingTab";
+import i18n, { type I18n } from "simplest-i18n";
 
 
 /**
  * 插件核心类
  */
-export default class MyPlugin extends Plugin {
+export default class DailyStatisticsPlugin extends Plugin {
   settings!: DailyStatisticsSettings;
   statisticsDataManager!: DailyStatisticsDataManager;
   debouncedUpdate!: Debouncer<[contents: string, filepath: string], void>;
   private statusBarItemEl!: HTMLElement;
+  t!: I18n;
 
   async onload() {
     await this.loadSettings();
-
-
-    // 因为可能出现文件还未加载到库中的情况，导致加载数据失败。
-    // await new Promise((resolve) => setTimeout(resolve, 6 * 1000));
-
-    // 异步执行操作
-    new Promise((resolve) => setTimeout(resolve, 6 * 1000));
 
 
     this.statisticsDataManager = new DailyStatisticsDataManager(
@@ -38,7 +29,7 @@ export default class MyPlugin extends Plugin {
       this.app,
       this
     );
-    this.statisticsDataManager.loadStatisticsData().then(r => {
+    this.statisticsDataManager.loadStatisticsData().then(() => {
       console.info("loadStatisticsData success. ");
     });
     this.debouncedUpdate = debounce(
@@ -61,71 +52,80 @@ export default class MyPlugin extends Plugin {
       false
     );
 
-    // 定时在的状态栏更新本日字数
-    this.statusBarItemEl = this.addStatusBarItem();
-    // statusBarItemEl.setText('Status Bar Text');
-    this.registerInterval(
-      window.setInterval(() => {
-        this.statusBarItemEl.setText(
-          this.statisticsDataManager.currentWordCount + " words today "
-        );
-      }, 1000)
-    );
+    this.t = i18n({
+      locale: this.settings.language,
+      locales: [
+        "zh-cn",
+        "en"
+      ]
+    });
+
+
 
     // 在快速预览时，更新统计数据
     this.registerEvent(
       this.app.workspace.on("quick-preview", this.onQuickPreview.bind(this))
     );
-    //
-    // // 定时保存数据
-    // this.registerInterval(
-    //   window.setInterval(() => {
-    //     this.statisticsDataManager.saveStatisticsData();
-    //   }, 1000)
-    // );
 
     // This adds a settings tab so the user can configure various aspects of the plugin
     this.addSettingTab(new SampleSettingTab(this.app, this));
-    // this.addSettingTab(new SampleSettingTab2(this.app, this));
 
-    this.registerView(Calendar_View, (leaf) => new CalendarView(leaf, this));
-    await this.activateView();
-
-    this.addCommand({
-      id: "obsidian-daily-statistics-open-calendar",
-      name: "打开日历面板",
-      callback: () => {
-        this.activateView();
-      }
-    });
   }
+
 
   onunload() {
+    // this.statusBarItemEl.remove()
+    // this.removeView().then();
+
   }
 
-  async activateView() {
-    const { workspace } = this.app;
 
-    let leaf: WorkspaceLeaf | null = null;
-    const leaves = workspace.getLeavesOfType(Calendar_View);
+  // 重新加载
+  async languageChange() {
+    this.t = i18n({
+      locale: this.settings.language,
+      locales: [
+        "zh-cn",
+        "en"
+      ]
+    });
 
-    if (leaves.length > 0) {
-      // A leaf with our view already exists, use that
-      leaf = leaves[0];
-    } else {
-      // Our view could not be found in the workspace, create a new leaf
-      // in the right sidebar for it
-      leaf = workspace.getRightLeaf(false);
-      if (leaf == null) {
-        console.error("leaf is null");
-        return;
-      }
-      await leaf.setViewState({ type: Calendar_View, active: true });
-    }
-
-    // "Reveal" the leaf in case it is in a collapsed sidebar
-    workspace.revealLeaf(leaf);
   }
+
+  // async activateView() {
+  //   const { workspace } = this.app;
+  //
+  //   let leaf: WorkspaceLeaf | null = null;
+  //   const leaves = workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE);
+  //
+  //   if (leaves.length > 0) {
+  //     // A leaf with our view already exists, use that
+  //     leaf = leaves[0];
+  //   } else {
+  //     // Our view could not be found in the workspace, create a new leaf
+  //     // in the right sidebar for it
+  //     leaf = workspace.getRightLeaf(false);
+  //     if (leaf == null) {
+  //       console.error("leaf is null");
+  //       return;
+  //     }
+  //     await leaf.setViewState({ type: VIEW_TYPE_EXAMPLE, active: true });
+  //   }
+  //
+  //   // "Reveal" the leaf in case it is in a collapsed sidebar
+  //   workspace.revealLeaf(leaf);
+  // }
+
+  // 移除视图
+  // async removeView() {
+  //   const { workspace } = this.app;
+  //   const leaves = workspace.getLeavesOfType(Calendar_View);
+  //   if (leaves.length > 0) {
+  //     // A leaf with our view already exists, use that
+  //     workspace.detachLeavesOfType(Calendar_View);
+  //   }
+  // }
+
 
   async loadSettings() {
     this.settings = Object.assign(
@@ -138,7 +138,10 @@ export default class MyPlugin extends Plugin {
   // 保存配置文件
   async saveSettings() {
     // 先获取最新的数据，再将新的配置保存进去
-    const data = await this.loadData();
+    let data = await this.loadData();
+    if (data == null) {
+      data = new DailyStatisticsSettings();
+    }
     Object.assign(data, this.settings);
     await this.saveData(data);
   }
@@ -150,4 +153,6 @@ export default class MyPlugin extends Plugin {
     }
   }
 }
+
+
 

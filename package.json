@@ -6,9 +6,7 @@
   "scripts": {
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
-    "dev1": "npm run lint && vite build --watch",
-    "dev2": "vite build --watch",
-    "dev": "vite build --watch",
+    "dev": "npm run lint && vite build --watch",
     "build": "npm run type-check && vite build --mode production",
     "format": "prettier --write src/",
     "updateVersion": "tsx scripts/updateVersion.ts"
@@ -19,8 +17,8 @@
     "@rushstack/eslint-patch": "^1.10.1",
     "@tsconfig/node18": "^2.0.1",
     "@types/node": "^20.x.x",
-    "@typescript-eslint/eslint-plugin": "5.32.0",
-    "@typescript-eslint/parser": "5.32.0",
+    "@typescript-eslint/eslint-plugin": "7.16.0",
+    "@typescript-eslint/parser": "7.16.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",
@@ -31,20 +29,17 @@
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.24.0",
     "inquirer": "^9.2.17",
+    "moment": "^2.30.1",
     "obsidian": "latest",
     "prettier": "^2.8.8",
+    "simplest-i18n": "^1.0.0",
     "tslib": "2.4.0",
-    "typescript": "^5.0.0",
-    "unplugin-auto-import": "^0.17.6",
-    "unplugin-vue-components": "^0.27.2",
+    "typescript": "5.1.6",
     "vite": "^5.2.8",
-    "vue": "^3.4.21",
     "vue-tsc": "^2.0.10",
-    "@vueuse/core": "^10.11.0",
-    "element-plus": "^2.7.6",
-    "moment": "^2.30.1",
-    "vuex": "^4.1.0"
-  },
-  "dependencies": {
+
+
+    "unplugin-auto-import": "^0.17.6",
+    "unplugin-vue-components": "^0.27.2"
   }
 }
